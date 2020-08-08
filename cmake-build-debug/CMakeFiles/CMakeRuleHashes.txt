@@ -1,0 +1,3 @@
+# Hashes of file build rules.
+7d5eb8f1eb612ca5ed159fc85dcc21a7 CMakeFiles/make_mac_vm
+9982052ecec6cf138bda5f733726ba54 CMakeFiles/make_mac_vm_simple
