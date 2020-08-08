@@ -1,7 +1,0 @@
-/Users/ujjwalkrishnamurthi/CLionProjects/C_ENV/cmake-build-debug/CMakeFiles/edit_cache.dir
-/Users/ujjwalkrishnamurthi/CLionProjects/C_ENV/cmake-build-debug/CMakeFiles/SQLite_Clone.dir
-/Users/ujjwalkrishnamurthi/CLionProjects/C_ENV/cmake-build-debug/CMakeFiles/make_mac_vm.dir
-/Users/ujjwalkrishnamurthi/CLionProjects/C_ENV/cmake-build-debug/CMakeFiles/make_mac_vm_simple.dir
-/Users/ujjwalkrishnamurthi/CLionProjects/C_ENV/cmake-build-debug/CMakeFiles/MAC_VM.dir
-/Users/ujjwalkrishnamurthi/CLionProjects/C_ENV/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/Users/ujjwalkrishnamurthi/CLionProjects/C_ENV/cmake-build-debug/CMakeFiles/MAC_VM_simple.dir
