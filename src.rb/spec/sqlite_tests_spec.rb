@@ -7,7 +7,11 @@ describe 'database' do
     raw_output = nil
     IO.popen("../out/db test.db", "r+") do |pipe|
       commands.each do |command|
-        pipe.puts command
+        begin
+          pipe.puts command
+        rescue Errno::EPIPE
+          break
+        end
       end
       pipe.close_write
 
@@ -37,7 +41,10 @@ describe 'database' do
     end
     script << ".exit"
     result = run_script(script)
-    expect(result[-2]).to eq('db_clone > Error: Table full.')
+    expect(result[-2]).to match_array([
+      "db_clone > Executed",
+      "db_clone > Need to implement updating parent after split"
+    ])
   end
 
   it 'allows inserting strings that are the maximum length' do
@@ -173,7 +180,7 @@ describe 'database' do
     result = run_script(script)
 
     expect(result[14...(result.length)]).to match_array([
-      "db > Tree:",
+      "db_clone > Tree:",
       "- internal (size 1)",
       "  - leaf (size 7)",
       "    - 1",
@@ -192,7 +199,8 @@ describe 'database' do
       "    - 12",
       "    - 13",
       "    - 14",
-      "db > Need to implement searching an internal node",
+      "db_clone > Executed.",
+      "db_clone > "
     ])
   end
 end

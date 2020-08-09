@@ -3,7 +3,6 @@
 //
 
 #include <assert.h>
-#include <string.h>
 #include "inputstream.c"
 #include "database.c"
 
@@ -76,7 +75,7 @@ void print_tree(Pager* pager, uint32_t page_num, uint32_t indent_lvl) {
             indent(indent_lvl);
             printf("- leaf (size %d)\n", num_keys);
             for(uint32_t i = 0; i < num_keys; i++) {
-                indent(indent_lvl);
+                indent(indent_lvl + 1);
                 printf("- %d\n", *leaf_node_key(node, i));
             }
             break;

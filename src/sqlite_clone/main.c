@@ -2,7 +2,6 @@
 // Created by Ujjwal Krishnamurthi on 7/28/20.
 //
 
-#include <stdbool.h>
 #include "compiler.c"
 
 void print_prompt() { printf("db_clone > "); }
