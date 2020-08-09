@@ -128,18 +128,6 @@ void db_close(Table* table) {
     free(table);
 }
 
-Cursor* table_start(Table* table) {
-    Cursor* cursor = malloc(sizeof(Cursor));
-    cursor->table = table;
-    cursor->page_num = table->root_page_num;
-    cursor->cell_num = 0;
-
-    void* root_node = get_page(table->pager, table->root_page_num);
-    uint32_t num_cells = *leaf_node_num_cells(root_node);
-    cursor->end_of_table = (num_cells == 0);
-    return cursor;
-}
-
 void* cursor_value(Cursor* cursor) {
     uint32_t page_num = cursor->page_num;
     void* page = get_page(cursor->table->pager, page_num);
@@ -152,7 +140,13 @@ void cursor_advance(Cursor* cursor) {
 
     cursor->cell_num += 1;
     if(cursor->cell_num >= *leaf_node_num_cells(node)) {
-        cursor->end_of_table = true;
+        uint32_t next_page_num = *leaf_node_next_leaf(node);
+        if(next_page_num == 0) { // End of table
+            cursor->end_of_table = true;
+        } else {
+            cursor->page_num = next_page_num;
+            cursor->cell_num = 0; //Restarting at beginning cell of next leaf node
+        }
     }
 }
 
@@ -227,6 +221,15 @@ Cursor* table_find(Table* table, uint32_t key) {
     }
 }
 
+Cursor* table_start(Table* table) {
+    Cursor* cursor = table_find(table, 0);
+
+    void* node = get_page(table->pager, cursor->page_num);
+    uint32_t num_cells = *leaf_node_num_cells(node);
+    cursor->end_of_table = (num_cells == 0);
+    return cursor;
+}
+
 void create_new_root(Table* table, uint32_t right_child_page_num) {
     /**
      * Handle splitting the root node
@@ -263,12 +266,20 @@ void leaf_node_split_and_insert(Cursor* cursor, uint32_t key, Row* value) {
     void* new_node = get_page(cursor->table->pager, new_page_num);
     initialize_leaf_node(new_node);
 
+    // Add sibling pointers
+    *leaf_node_next_leaf(new_node) = *leaf_node_next_leaf(old_node);
+    *leaf_node_next_leaf(old_node) = new_page_num;
+
     for(int32_t i = LEAF_NODE_MAX_CELLS; i >= 0; i--) {
         void* destination_node = i >= LEAF_NODE_LEFT_SPLIT_COUNT ? new_node : old_node;
         uint32_t index_in_node = i % LEAF_NODE_LEFT_SPLIT_COUNT;
         void* destination = leaf_node_cell(destination_node, index_in_node);
 
-        if(i == cursor->cell_num) serialize_row(value, destination);
+        if(i == cursor->cell_num) {
+            // Leaf node has key and value pair, now we don't write new node values into the key
+            serialize_row(value, leaf_node_value(destination_node, index_in_node));
+            *leaf_node_key(destination_node, index_in_node) = key;
+        }
         else if(i > cursor->cell_num) memcpy(destination, leaf_node_cell(old_node, i - 1), LEAF_NODE_CELL_SIZE);
         else memcpy(destination, leaf_node_cell(old_node, i), LEAF_NODE_CELL_SIZE);
     }
