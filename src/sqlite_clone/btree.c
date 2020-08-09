@@ -87,6 +87,8 @@ const uint32_t INTERNAL_NODE_HEADER_SIZE = COMMON_NODE_HEADER_SIZE +
 const uint32_t INTERNAL_NODE_KEY_SIZE = sizeof(uint32_t);
 const uint32_t INTERNAL_NODE_CHILD_SIZE = sizeof(uint32_t);
 const uint32_t INTERNAL_NODE_CELL_SIZE = INTERNAL_NODE_CHILD_SIZE + INTERNAL_NODE_KEY_SIZE;
+const uint32_t INTERNAL_NODE_MAX_CELLS = 3; //Hardcoded and small for testing
+// – will fix when internal node splitting implemented
 
 
 /**
@@ -141,6 +143,8 @@ uint32_t get_unused_page_num(Pager* pager) { return pager->num_pages; }
 
 
 /**Internal Node Access methods*/
+uint32_t* node_parent(void* node) { return node + PARENT_POINTER_OFFSET; }
+
 uint32_t* internal_node_num_keys(void* node) {
     return node + INTERNAL_NODE_NUM_KEYS_OFFSET;
 }
@@ -163,13 +167,33 @@ uint32_t* internal_node_child(void* node, uint32_t child_num) {
 }
 
 uint32_t* internal_node_key(void* node, uint32_t key_num) {
-    return internal_node_cell(node, key_num) + INTERNAL_NODE_CHILD_SIZE;
+    return (void*)internal_node_cell(node, key_num) + INTERNAL_NODE_CHILD_SIZE;
 }
 
-void initialize_internal_node(void* node) {
-    set_node_type(node, NODE_INTERNAL);
-    set_node_root(node, false);
-    *internal_node_num_keys(node) = 0;
+uint32_t internal_node_find_child(void* node, uint32_t key) {
+    /**
+     * Return index of child with given key
+    */
+    uint32_t num_keys = *internal_node_num_keys(node);
+
+    // Binary search
+    uint32_t min_index = 0;
+    uint32_t max_index_next = num_keys; // One more child than key
+    while(min_index != max_index_next) {
+        uint32_t index = (min_index + max_index_next) / 2;
+        uint32_t key_to_right = *internal_node_key(node, index);
+        if(key_to_right >= key) {
+            max_index_next = index;
+        } else {
+            min_index = index + 1;
+        }
+    }
+    return min_index;
+}
+
+void update_internal_node_key(void* node, uint32_t old_key, uint32_t new_key) {
+    uint32_t old_child_index = internal_node_find_child(node, old_key);
+    *internal_node_key(node, old_child_index) = new_key;
 }
 
 
@@ -194,14 +218,7 @@ uint32_t* leaf_node_next_leaf(void* node) {
     return node + LEAF_NODE_NEXT_LEAF_OFFSET;
 }
 
-void initialize_leaf_node(void* node) {
-    set_node_type(node, NODE_LEAF);
-    set_node_root(node, false);
-    *leaf_node_num_cells(node) = 0;
-    *leaf_node_next_leaf(node) = 0; // 0 = no sibiling
-}
-
-/**Node modification methods*/
+/**Gen node access methods*/
 uint32_t get_node_max_key(void* node) {
     switch (get_node_type(node)) {
         case NODE_INTERNAL:
@@ -210,6 +227,21 @@ uint32_t get_node_max_key(void* node) {
             return *leaf_node_key(node, *leaf_node_num_cells(node) - 1);
     }
 }
+
+/**Node modification methods*/
+void initialize_internal_node(void* node) {
+    set_node_type(node, NODE_INTERNAL);
+    set_node_root(node, false);
+    *internal_node_num_keys(node) = 0;
+}
+
+void initialize_leaf_node(void* node) {
+    set_node_type(node, NODE_LEAF);
+    set_node_root(node, false);
+    *leaf_node_num_cells(node) = 0;
+    *leaf_node_next_leaf(node) = 0; // 0 = no sibiling
+}
+
 
 // DB Writing methods
 void serialize_row(Row* source, void* destination) {

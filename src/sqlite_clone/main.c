@@ -1,6 +1,7 @@
 //
 // Created by Ujjwal Krishnamurthi on 7/28/20.
-//
+// TODO: All operations (Majority of page operations) use void pointer arithmetic. This isn't accepted C practice,
+//  only run with GNU C standards where size of void is 1 (run mainly with gcc)
 
 #include "compiler.c"
 
