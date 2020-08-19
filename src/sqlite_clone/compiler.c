@@ -175,7 +175,7 @@ ExecuteResult execute_insert(Statement* statement, Table* table) {
     return EXECUTE_SUCCESS;
 }
 
-ExecuteResult execute_select(Statement* statement, Table* table) {
+ExecuteResult execute_select(Table* table) {
     Cursor *cursor = table_start(table);
     Row row;
     while(!(cursor->end_of_table)) {
@@ -193,6 +193,6 @@ ExecuteResult execute_statement(Statement* statement, Table* table) {
         case (STATEMENT_INSERT):
             return execute_insert(statement, table);
         case (STATEMENT_SELECT):
-            return execute_select(statement, table);
+            return execute_select(table); //Removing statement for now, can always add in later if necessary
     }
 }
