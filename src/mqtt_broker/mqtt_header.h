@@ -8,11 +8,6 @@
 #define MQTT_HEADER_LEN_BYTES 2
 #define MQTT_ACK_LEN_BYTES 4
 
-// Unpacking enum to define preprocessing for standardization across compilers
-#define AT_MOST_ONCE 0u
-#define AT_LEAST_ONCE 1u
-#define EXACTLY_ONCE 2u
-
 /**
  * Stub bytes, useful for generic replies, these represent the first byte in
  * the fixed header
@@ -45,7 +40,7 @@ enum packet_type {
     DISCONNECT  = 14
 };
 
-//enum qos_level { AT_MOST_ONCE = 0u, AT_LEAST_ONCE = 1u, EXACTLY_ONCE = 2u };
+enum qos_level { AT_MOST_ONCE, AT_LEAST_ONCE, EXACTLY_ONCE };
 
 union mqtt_header {
     unsigned char byte;
