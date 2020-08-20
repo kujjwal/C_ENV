@@ -27,14 +27,6 @@ file(GLOB SQL_SOURCES src/sqlite_clone/*.c)
 add_executable(SQLite_Clone ${SQL_SOURCES})
 # add_executable(Blockchain_Dummy src/blockchain_dummy/blockchain_dummy.h src/blockchain_dummy/blockchain_dummy.c)
 
-# MQTT Broker target
-if(DEBUG)
-    message(STATUS "Configuring build for debug")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wunused -Werror -std=c99 -O3 -pedantic -luuid -ggdb -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -pg")
-else(DEBUG)
-    message(STATUS "Configuring build for production")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wunused -Werror -Wextra -std=c99 -O3 -pedantic -luuid")
-endif()
-
-file(GLOB MQTT_SOURCES src/mqtt_broker/*.c)
-add_executable(mqtt_broker ${MQTT_SOURCES})
+# NTP Client target
+file(GLOB NTP_SOURCES src/ntp/ntp.c)
+add_executable(NTP ${NTP_SOURCES})
