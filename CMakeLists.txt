@@ -30,3 +30,7 @@ add_executable(SQLite_Clone ${SQL_SOURCES})
 # NTP Client target
 file(GLOB NTP_SOURCES src/ntp/ntp.c)
 add_executable(NTP ${NTP_SOURCES})
+
+# Lsh shell target
+file(GLOB C_SHELL_SOURCES src/c_shell/lsh.c)
+add_executable(C_SHELL ${C_SHELL_SOURCES} src/c_shell/lsh_builtin.c)
